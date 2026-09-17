@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.qbw.obalivetool",
+  "appId": "com.live.assistant",
+  "productName": "直播小助理",
   "asar": true,
   "directories": {
     "output": "release/${version}"
@@ -28,10 +29,11 @@
     "artifactName": "${productName}_${version}_windows_${arch}.${ext}"
   },
   "nsis": {
+    "unicode": true,
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false,
-    "differentialPackage": true
+    "differentialPackage": false
   }
 }

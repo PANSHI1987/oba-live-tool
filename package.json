@@ -1,9 +1,9 @@
 {
-  "name": "oba-live-tool",
+  "name": "live-assistant",
   "type": "module",
-  "version": "1.6.1",
+  "version": "1.0.0",
   "private": true,
-  "description": "直播工具，用于直播带货，能自动弹窗，自动发言",
+  "description": "直播小助理",
   "author": "qiutongxue",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "electron-updater": "6.6.2",
+    "framer-motion": "^12.40.0",
     "playwright": "^1.50.0",
     "playwright-extra": "^4.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"

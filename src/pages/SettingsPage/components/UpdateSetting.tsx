@@ -1,81 +1,60 @@
-import { RefreshCw } from 'lucide-react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { Switch } from '@/components/ui/switch'
-import { useUpdateConfigStore, useUpdateStore } from '@/hooks/useUpdate'
+import { Badge } from '@/components/ui/badge'
+import { usePaymentStore, PLANS } from '@/hooks/usePaymentStore'
 import { version } from '../../../../package.json'
 
-export function UpdateSetting() {
-  const { enableAutoCheckUpdate, setEnableAutoCheckUpdate } = useUpdateConfigStore()
-  const updateStatus = useUpdateStore.use.status()
-  const checkUpdateManually = useUpdateStore.use.checkUpdateManually()
-  const [isUpToDate, setIsUpToDate] = useState(false)
+function formatRemaining(ms: number): string {
+  if (!Number.isFinite(ms)) return '永久'
+  if (ms <= 0) return '已过期'
+  const days = Math.floor(ms / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  if (days > 0) return `${days}天${hours}小时`
+  return `${hours}小时`
+}
 
-  const checkUpdate = async () => {
-    const result = await checkUpdateManually()
-    if (result) {
-      setIsUpToDate(result.upToDate)
-    }
-  }
+export function UpdateSetting() {
+  const { licensed, planId, getRemainingMs, firstLaunchAt } = usePaymentStore()
+  const remaining = getRemainingMs()
+  const plan = PLANS.find(p => p.id === planId)
 
   return (
     <Card id="update-section">
       <CardHeader>
-        <CardTitle>软件更新</CardTitle>
-        <CardDescription>检查并安装最新版本的应用程序</CardDescription>
+        <CardTitle>软件版本</CardTitle>
+        <CardDescription>当前应用程序版本信息</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          {/* 手动更新 */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label>更新源</Label>
-              <p className="text-sm text-muted-foreground">选择合适的更新源以获取最新版本</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                disabled={updateStatus === 'checking'}
-                onClick={checkUpdate}
-                size="sm"
-              >
-                {updateStatus === 'checking' ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    检查更新中
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    {isUpToDate ? '已是最新版本' : '检查更新'}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <Separator className="my-6" />
-
-        <div className="flex justify-between items-center ">
-          <div className="space-y-1">
-            <Label>有新版本时弹窗提示</Label>
-            <p className="text-sm text-muted-foreground">弹窗显示新版本更新了什么内容</p>
-          </div>
-          <Switch checked={enableAutoCheckUpdate} onCheckedChange={setEnableAutoCheckUpdate} />
-        </div>
-
-        <Separator />
-
+      <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h4 className="text-sm font-medium leading-none">当前版本</h4>
             <p className="text-sm text-muted-foreground">{version}</p>
           </div>
         </div>
+
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h4 className="text-sm font-medium leading-none">授权状态</h4>
+            <p className="text-sm text-muted-foreground">
+              {licensed
+                ? `已激活 - ${plan?.name || '会员'}`
+                : `试用中 - 剩余 ${formatRemaining(remaining)}`}
+            </p>
+          </div>
+          <Badge variant={licensed ? 'default' : 'secondary'}>
+            {licensed ? '已激活' : '试用版'}
+          </Badge>
+        </div>
+
+        {!licensed && firstLaunchAt && (
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h4 className="text-sm font-medium leading-none">试用开始时间</h4>
+              <p className="text-sm text-muted-foreground">
+                {new Date(firstLaunchAt).toLocaleDateString('zh-CN')}
+              </p>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

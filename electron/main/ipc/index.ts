@@ -6,6 +6,7 @@ import { setupBrowserIpcHandlers } from './browser'
 import { setupAutoReplyIpcHandlers } from './commentListener'
 import { setupLiveControlIpcHandlers } from './connection'
 import { setupPinCommentIpcHandler } from './pinComment'
+import { setupPaymentIpcHandlers } from './payment'
 import { setupRedPacketIpcHandlers } from './redPacket'
 import { setupUpdateIpcHandlers } from './update'
 
@@ -17,5 +18,6 @@ setupAutoMessageIpcHandlers()
 setupBrowserIpcHandlers()
 setupAppIpcHandlers()
 setupUpdateIpcHandlers()
+setupPaymentIpcHandlers()
 setupPinCommentIpcHandler()
 setupRedPacketIpcHandlers()

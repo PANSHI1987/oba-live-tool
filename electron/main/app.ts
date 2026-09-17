@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { IPC_CHANNELS } from 'shared/ipcChannels'
 import { emitter } from './event/eventBus'
-import { updateManager } from './managers/UpdateManager'
+// import { updateManager } from './managers/UpdateManager'
 import { providerService } from './services/ProviderService'
 import windowManager from './windowManager'
 import './ipc'
@@ -89,7 +89,7 @@ const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
 async function createWindow() {
   win = new BrowserWindow({
-    title: `OBA 直播工具 - v${app.getVersion()}`,
+    title: `直播小助理 - v${app.getVersion()}`,
     width: 1280,
     height: 800,
     autoHideMenuBar: app.isPackaged,
@@ -116,10 +116,10 @@ async function createWindow() {
     win.loadFile(indexHtml)
   }
 
-  // 加载完成后检查更新
-  win.webContents.on('did-finish-load', async () => {
-    await updateManager.silentCheckForUpdate()
-  })
+  // 加载完成后检查更新（已禁用）
+  // win.webContents.on('did-finish-load', async () => {
+  //   await updateManager.silentCheckForUpdate()
+  // })
 
   // Make all links open with the browser, not with the application
   win.webContents.setWindowOpenHandler(({ url }) => {

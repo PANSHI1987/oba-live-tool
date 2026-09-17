@@ -65,6 +65,11 @@ export const IPC_CHANNELS = {
     updateDownloaded: 'updater:updateDownloaded',
     quitAndInstall: 'updater:quitAndInstall',
   },
+  payment: {
+    createOrder: 'payment:createOrder',
+    queryOrder: 'payment:queryOrder',
+    paymentSuccess: 'payment:success',
+  },
   account: {
     switch: 'account:switch',
   },

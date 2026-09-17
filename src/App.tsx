@@ -16,7 +16,9 @@ import { Header } from './components/common/Header'
 import { useIpcListener } from './hooks/useIpc'
 import './App.css'
 import { useEffect } from 'react'
-import { UpdateDialog } from './components/update/UpdateDialog'
+import { usePaymentStore } from './hooks/usePaymentStore'
+import PaymentPage from './pages/Payment'
+// import { UpdateDialog } from './components/update/UpdateDialog'
 import { useAccounts } from './hooks/useAccounts'
 import { useAutoMessageStore } from './hooks/useAutoMessage'
 import { useAutoPopUpStore } from './hooks/useAutoPopUp'
@@ -24,7 +26,7 @@ import { useAutoReply, useAutoReplyStore } from './hooks/useAutoReply'
 import { useChromeConfigStore } from './hooks/useChromeConfig'
 import { useLiveControlStore } from './hooks/useLiveControl'
 import { useToast } from './hooks/useToast'
-import { useUpdateConfigStore, useUpdateStore } from './hooks/useUpdate'
+// import { useUpdateConfigStore, useUpdateStore } from './hooks/useUpdate'
 
 function useGlobalIpcListener() {
   const { handleComment } = useAutoReply()
@@ -33,8 +35,6 @@ function useGlobalIpcListener() {
   const setIsRunningAutoMessage = useAutoMessageStore(s => s.setIsRunning)
   const setIsRunningAutoPopUp = useAutoPopUpStore(s => s.setIsRunning)
   const setStorageState = useChromeConfigStore(s => s.setStorageState)
-  const enableAutoCheckUpdate = useUpdateConfigStore(s => s.enableAutoCheckUpdate)
-  const handleUpdate = useUpdateStore.use.handleUpdate()
   const { toast } = useToast()
 
   useIpcListener(IPC_CHANNELS.tasks.autoReply.showComment, ({ comment, accountId }) => {
@@ -70,16 +70,28 @@ function useGlobalIpcListener() {
     }
   })
 
-  useIpcListener(IPC_CHANNELS.app.notifyUpdate, info => {
-    if (enableAutoCheckUpdate) {
-      handleUpdate(info)
-    }
-  })
+  // 更新功能已禁用
+  // useIpcListener(IPC_CHANNELS.app.notifyUpdate, info => {
+  //   if (enableAutoCheckUpdate) {
+  //     handleUpdate(info)
+  //   }
+  // })
 }
 
 function App() {
   const { enabled: devMode } = useDevMode()
   const { accounts, currentAccountId } = useAccounts()
+  const { initTrial, isTrialExpired, licensed, activateLicense, getLicenseRemainingMs, planId } = usePaymentStore()
+
+  useEffect(() => {
+    initTrial()
+  }, [])
+
+  // 未授权且试用期已过 → 付费页
+  // 已授权但非终身会员且会员已到期 → 付费页
+  const trialExpired = !licensed && isTrialExpired()
+  const licenseExpired = licensed && planId !== 'lifetime' && getLicenseRemainingMs() <= 0
+  const showPayment = trialExpired || licenseExpired
 
   useEffect(() => {
     const account = accounts.find(acc => acc.id === currentAccountId)
@@ -96,6 +108,15 @@ function App() {
 
   const handleToggleDevTools = async () => {
     await window.ipcRenderer.invoke(IPC_CHANNELS.chrome.toggleDevTools)
+  }
+
+  if (showPayment) {
+    return (
+      <>
+        <PaymentPage />
+        <Toaster />
+      </>
+    )
   }
 
   return (
@@ -122,7 +143,7 @@ function App() {
               <LogDisplayer />
             </div>
           </div>
-          <UpdateDialog />
+          {/* <UpdateDialog /> */}
         </ContextMenuTrigger>
         {devMode && (
           <ContextMenuContent>

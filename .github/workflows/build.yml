@@ -1,57 +1,37 @@
-name: Build
+name: Build Windows Installer
 
 on:
+  workflow_dispatch:
   push:
-    branches: [main]
-    paths-ignore:
-      - "**.md"
-      - "**.spec.js"
-      - ".idea"
-      - ".vscode"
-      - ".dockerignore"
-      - "Dockerfile"
-      - ".gitignore"
-      - ".github/**"
-      - "!.github/workflows/build.yml"
+    tags:
+      - 'v*'
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        # macos-13 采用 intel 架构，见 https://docs.github.com/en/actions/using-github-hosted-runners/using-github-hosted-runners/about-github-hosted-runners#standard-github-hosted-runners-for-public-repositories
-        os: [macos-latest, windows-latest] # os: [macos-latest, windows-latest, macos-13] 
-
+  build-windows:
+    runs-on: windows-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      - name: install pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install
 
-      - name: Build Release Files
+      - name: Build
         run: pnpm build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Artifact
+      - name: Upload Windows installer
         uses: actions/upload-artifact@v4
-        with: 
-          name: release_on_${{ matrix. os }}
-          path: |
-            release/*/*.exe
-            release/*/*.dmg
-          retention-days: 7
+        with:
+          name: windows-installer
+          path: release/1.0.0/*.exe
+          if-no-files-found: error

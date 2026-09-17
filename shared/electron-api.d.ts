@@ -111,6 +111,18 @@ export interface IpcChannels {
   [IPC_CHANNELS.updater.downloadProgress]: (progress: ProgressInfo) => void
   [IPC_CHANNELS.updater.updateDownloaded]: (event?: UpdateDownloadedEvent) => void
 
+  // Payment
+  [IPC_CHANNELS.payment.createOrder]: (params: {
+    name: string
+    money: string
+    planId?: string
+  }) => Promise<{ code: number; msg?: string; trade_no?: string; payurl?: string; qrcode?: string }>
+  [IPC_CHANNELS.payment.queryOrder]: (tradeNo: string) => Promise<{ paid: boolean; planId?: string }>
+  [IPC_CHANNELS.payment.paymentSuccess]: (data: {
+    planId: string
+    tradeNo: string
+  }) => void
+
   // Chrome
   [IPC_CHANNELS.chrome.selectPath]: () => string | null
   [IPC_CHANNELS.chrome.getPath]: (edge?: boolean) => string | null
